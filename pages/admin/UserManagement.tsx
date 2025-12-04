@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../../services/mockBackend';
 import { User } from '../../types';
 import { Button } from '../../components/ui/Button';
-import { Trash2, Lock, Unlock } from 'lucide-react';
+import { Trash2, Lock, Unlock, ArrowLeft } from 'lucide-react';
 
 export const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -29,32 +30,47 @@ export const UserManagement: React.FC = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">User Management</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+            <Link to="/admin/dashboard" className="p-2 rounded-lg bg-white dark:bg-[#1A1A1A] text-slate-500 hover:text-purple-600 transition-colors border border-slate-200 dark:border-[#333]">
+                <ArrowLeft size={20} />
+            </Link>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">User Management</h1>
+        </div>
+        <Button size="sm">Add User</Button>
+      </div>
       
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-slate-200 dark:border-[#333] shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400">
+            <thead className="bg-slate-50 dark:bg-[#111] text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-[#333]">
               <tr>
-                <th className="px-6 py-3 font-medium">Username</th>
-                <th className="px-6 py-3 font-medium">Email</th>
-                <th className="px-6 py-3 font-medium">Role</th>
-                <th className="px-6 py-3 font-medium">Status</th>
-                <th className="px-6 py-3 font-medium">Actions</th>
+                <th className="px-6 py-4 font-semibold">Username</th>
+                <th className="px-6 py-4 font-semibold">Email</th>
+                <th className="px-6 py-4 font-semibold">Role</th>
+                <th className="px-6 py-4 font-semibold">Status</th>
+                <th className="px-6 py-4 font-semibold">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+            <tbody className="divide-y divide-slate-100 dark:divide-[#2A2A2A]">
               {users.map(user => (
-                <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">{user.username}</td>
-                  <td className="px-6 py-4 text-slate-500">{user.email}</td>
+                <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-[#222] transition-colors">
+                  <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-[#333] flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-400">
+                            {user.username.substring(0, 2).toUpperCase()}
+                        </div>
+                        {user.username}
+                      </div>
+                  </td>
+                  <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{user.email}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-xs rounded-full ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                    <span className={`px-2.5 py-1 text-xs rounded-full font-medium ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
                       {user.role}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-xs rounded-full ${user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    <span className={`px-2.5 py-1 text-xs rounded-full font-medium ${user.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'}`}>
                       {user.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
@@ -64,8 +80,9 @@ export const UserManagement: React.FC = () => {
                       size="sm"
                       onClick={() => handleToggleStatus(user.id)}
                       title={user.isActive ? "Deactivate User" : "Activate User"}
+                      className="bg-white dark:bg-[#2A2A2A] border border-slate-200 dark:border-[#333]"
                     >
-                      {user.isActive ? <Lock size={16}/> : <Unlock size={16}/>}
+                      {user.isActive ? <Lock size={14}/> : <Unlock size={14}/>}
                     </Button>
                     <Button 
                       variant="danger" 
@@ -73,7 +90,7 @@ export const UserManagement: React.FC = () => {
                       onClick={() => handleDelete(user.id)}
                       title="Delete User"
                     >
-                      <Trash2 size={16}/>
+                      <Trash2 size={14}/>
                     </Button>
                   </td>
                 </tr>

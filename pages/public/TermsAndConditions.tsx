@@ -1,11 +1,9 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
+import { PublicHeader } from '../../components/PublicHeader';
 import { 
-  ArrowLeft, 
-  Moon, 
-  Sun, 
   ChevronDown, 
   ChevronUp, 
   FileText, 
@@ -24,8 +22,6 @@ import {
 
 export const TermsAndConditions: React.FC = () => {
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = useState(false);
-  const [readingProgress, setReadingProgress] = useState(0);
   const [openSection, setOpenSection] = useState<string | null>('intro');
   const [agreed, setAgreed] = useState(false);
 
@@ -105,39 +101,9 @@ export const TermsAndConditions: React.FC = () => {
     }
   ];
 
-  const toggleTheme = () => {
-    if (document.documentElement.classList.contains('dark')) {
-      document.documentElement.classList.remove('dark');
-      setDarkMode(false);
-    } else {
-      document.documentElement.classList.add('dark');
-      setDarkMode(true);
-    }
-  };
-
   const toggleSection = (id: string) => {
     setOpenSection(openSection === id ? null : id);
   };
-
-  // Scroll Progress Listener
-  useEffect(() => {
-    const handleScroll = () => {
-      const totalScroll = document.documentElement.scrollTop;
-      const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const scroll = `${totalScroll / windowHeight}`;
-      setReadingProgress(Number(scroll));
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Initialize Dark Mode state based on document
-  useEffect(() => {
-    if (document.documentElement.classList.contains('dark')) {
-      setDarkMode(true);
-    }
-  }, []);
 
   const handleAccept = () => {
     if (agreed) {
@@ -150,36 +116,11 @@ export const TermsAndConditions: React.FC = () => {
     <div className="min-h-screen bg-slate-100 dark:bg-black transition-colors duration-300 font-sans pb-20">
       
       {/* Top Bar */}
-      <div className="fixed top-0 left-0 w-full z-50 bg-white/90 dark:bg-black/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-                <Link to="/" className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
-                    <ArrowLeft size={20} />
-                </Link>
-                <div>
-                    <h1 className="text-lg font-bold text-slate-900 dark:text-white">Terms & Conditions</h1>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Please review the terms before continuing</p>
-                </div>
-            </div>
-            <button onClick={toggleTheme} className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-yellow-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                {darkMode ? <Moon size={20} /> : <Sun size={20} />}
-            </button>
-         </div>
-         {/* Reading Progress Bar */}
-         <div className="w-full h-1 bg-slate-200 dark:bg-slate-800">
-            <div 
-                className="h-full bg-slate-900 dark:bg-white transition-all duration-150 ease-out"
-                style={{ width: `${readingProgress * 100}%` }}
-            ></div>
-         </div>
-      </div>
+      <PublicHeader />
 
       <div className="pt-24 max-w-4xl mx-auto px-6">
-        <div className="flex justify-between items-center mb-6">
-            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Reading Progress</span>
-            <span className="text-sm font-bold text-slate-900 dark:text-white">{Math.round(readingProgress * 100)}%</span>
-        </div>
-
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">Terms & Conditions</h1>
+        
         {/* Accordion Sections */}
         <div className="space-y-4">
             {sections.map((section) => (

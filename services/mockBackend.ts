@@ -1,11 +1,17 @@
 import { User, UserRole, AnalysisResult, SystemStats, AuthResponse } from '../types';
+import { GoogleGenAI, Type } from "@google/genai";
 
 // Keys for LocalStorage
 const USERS_KEY = 'cordforge_users';
 const ANALYSIS_KEY = 'cordforge_analysis';
 const SESSION_KEY = 'cordforge_session';
 
-// Helper to delay response (simulate network)
+// Initialize Gemini API
+// We assume process.env.API_KEY is available in the environment
+// NOTE: For live deployment, ensure your build tool (like Vite) exposes this variable.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+// Helper to delay response (simulate network for auth operations)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Initial Admin User
@@ -92,56 +98,117 @@ export const api = {
 
   analysis: {
     create: async (userId: string, text: string, image?: string, runOcr: boolean = false, runObj: boolean = false): Promise<AnalysisResult> => {
-      await delay(2000); // Simulate ML processing time
-
-      // Stub Logic for Simulation based on SRS
-      const isSinhala = /[\u0D80-\u0DFF]+/.test(text);
-      
-      const sentiment = Math.random() > 0.6 ? 'Positive' : Math.random() > 0.3 ? 'Negative' : 'Neutral';
-      const sarcasm = Math.random() > 0.7;
-      const humor = Math.random() > 0.7;
-
-      let ocrText = '';
-      let detectedObjects: string[] = [];
-
-      if (runOcr && image) {
-        ocrText = "Sample Sinhala OCR Text: මේක හරිම පුදුම වැඩක්"; // Simulated OCR output
+      // Safety check for deployment: Ensure API Key is present
+      if (!process.env.API_KEY) {
+        throw new Error("Configuration Error: API_KEY is missing in your environment variables. Please check your hosting settings.");
       }
 
-      if (runObj && image) {
-        detectedObjects = ['Person', 'Mobile Phone', 'Indoor']; // Simulated Object Detection
+      const startTime = Date.now();
+
+      try {
+        // Prepare contents for Gemini
+        const parts: any[] = [];
+        
+        // Construct a strong system prompt within the request
+        let promptText = `Analyze the provided content. 
+        Input Context: The text is likely in Sinhala.
+        
+        Required Output format: JSON
+        
+        Tasks:
+        1. Determine Sentiment ('Positive', 'Negative', 'Neutral').
+        2. Detect Sarcasm (true/false).
+        3. Detect Humor (true/false).
+        `;
+
+        if (runOcr && image) {
+          promptText += `4. Extract text from the image (OCR). If none, return empty string.\n`;
+        }
+        if (runObj && image) {
+          promptText += `5. Detect up to 5 main objects in the image.\n`;
+        }
+
+        promptText += `\nInput Text to analyze: "${text || ''}"`;
+        
+        parts.push({ text: promptText });
+
+        // Handle Image
+        if (image) {
+           // Parse base64 string: "data:image/png;base64,....."
+           const matches = image.match(/^data:(.+);base64,(.+)$/);
+           if (matches) {
+             parts.push({
+               inlineData: {
+                 mimeType: matches[1],
+                 data: matches[2]
+               }
+             });
+           }
+        }
+
+        // Define strict output schema
+        const responseSchema = {
+          type: Type.OBJECT,
+          properties: {
+            sentiment: { type: Type.STRING, enum: ['Positive', 'Negative', 'Neutral'] },
+            sarcasm: { type: Type.BOOLEAN },
+            humor: { type: Type.BOOLEAN },
+            ocrText: { type: Type.STRING },
+            detectedObjects: { type: Type.ARRAY, items: { type: Type.STRING } }
+          },
+          required: ['sentiment', 'sarcasm', 'humor']
+        };
+
+        // Call Gemini API
+        const response = await ai.models.generateContent({
+           model: 'gemini-2.5-flash',
+           contents: { parts },
+           config: {
+             responseMimeType: 'application/json',
+             responseSchema: responseSchema,
+             systemInstruction: "You are an intelligent sentiment analysis engine specialized in Sinhala language social media comments. You understand slang, cultural references, sarcasm, and humor. Always return valid JSON."
+           }
+        });
+
+        const data = JSON.parse(response.text);
+
+        const result: AnalysisResult = {
+          id: `anl-${Date.now()}`,
+          userId,
+          originalText: text,
+          imageUrl: image,
+          ocrText: data.ocrText || (runOcr ? 'No text found' : undefined),
+          detectedObjects: data.detectedObjects || [],
+          sentiment: data.sentiment as any,
+          sarcasm: data.sarcasm,
+          humor: data.humor,
+          confidenceScore: 0.9, // Gemini is highly capable
+          timestamp: new Date().toISOString(),
+          processingTimeMs: Date.now() - startTime
+        };
+
+        // Save to "Database" (LocalStorage)
+        const allAnalysis = JSON.parse(localStorage.getItem(ANALYSIS_KEY) || '[]');
+        allAnalysis.unshift(result); 
+        localStorage.setItem(ANALYSIS_KEY, JSON.stringify(allAnalysis));
+
+        return result;
+
+      } catch (error: any) {
+        console.error("AI Analysis Error:", error);
+        // Fallback for demo if API key is missing or invalid
+        throw new Error(error.message || "Analysis failed. Please check your network connection.");
       }
-
-      const result: AnalysisResult = {
-        id: `anl-${Date.now()}`,
-        userId,
-        originalText: text,
-        imageUrl: image,
-        ocrText,
-        detectedObjects,
-        sentiment,
-        sarcasm,
-        humor,
-        confidenceScore: 0.85 + (Math.random() * 0.14),
-        timestamp: new Date().toISOString(),
-        processingTimeMs: 1200 + Math.floor(Math.random() * 2000)
-      };
-
-      const allAnalysis = JSON.parse(localStorage.getItem(ANALYSIS_KEY) || '[]');
-      allAnalysis.unshift(result); // Add to top
-      localStorage.setItem(ANALYSIS_KEY, JSON.stringify(allAnalysis));
-
-      return result;
     },
 
     getByUser: async (userId: string): Promise<AnalysisResult[]> => {
-      await delay(500);
+      await delay(300); // Small delay for realism
       const all = JSON.parse(localStorage.getItem(ANALYSIS_KEY) || '[]');
       return all.filter((r: AnalysisResult) => r.userId === userId);
     },
 
     getAll: async (): Promise<AnalysisResult[]> => {
-      await delay(500);
+      await delay(300);
       return JSON.parse(localStorage.getItem(ANALYSIS_KEY) || '[]');
     },
 

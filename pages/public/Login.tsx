@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../services/mockBackend';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
-import { Smile, ArrowLeft, Moon, Sun } from 'lucide-react';
+import { Activity, ArrowLeft, Moon, Sun } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -67,8 +68,8 @@ export const Login: React.FC = () => {
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-2xl rounded-3xl p-8 sm:p-10">
           
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-black dark:bg-black rounded-full flex items-center justify-center shadow-lg mb-4 ring-4 ring-slate-100 dark:ring-slate-800">
-              <Smile className="text-white w-8 h-8" strokeWidth={1.5} />
+            <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center shadow-lg mb-4 ring-4 ring-slate-100 dark:ring-slate-800">
+              <Activity className="text-white w-8 h-8" strokeWidth={1.5} />
             </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Welcome Back</h1>
             <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">Sign in to continue analyzing comments</p>

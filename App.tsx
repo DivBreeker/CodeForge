@@ -8,9 +8,11 @@ import { Login } from './pages/public/Login';
 import { Register } from './pages/public/Register';
 import { ResetPassword } from './pages/public/ResetPassword';
 import { TermsAndConditions } from './pages/public/TermsAndConditions';
+import { Contact } from './pages/public/Contact';
 import { NotFound } from './pages/public/NotFound';
 import { Dashboard } from './pages/user/Dashboard';
 import { Upload } from './pages/user/Upload';
+import { HelpGuide } from './pages/user/HelpGuide';
 import { UserRole } from './types';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { UserManagement } from './pages/admin/UserManagement';
@@ -21,7 +23,7 @@ const PrivateRoute: React.FC<{ children: React.ReactElement, roles?: UserRole[] 
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/" replace />;
 
   if (roles && !roles.includes(user.role)) {
     return <Navigate to="/dashboard" replace />;
@@ -99,6 +101,7 @@ const App: React.FC = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<div className="p-10">About Page Stub</div>} />
 
           {/* User Routes */}
@@ -106,7 +109,7 @@ const App: React.FC = () => {
           <Route path="/upload" element={<PrivateRoute><Upload /></PrivateRoute>} />
           <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-          <Route path="/guide" element={<PrivateRoute><div className="p-8"><h1 className="text-2xl font-bold dark:text-white">Help Guide</h1><p className="dark:text-slate-300 mt-4">1. Upload text or image.<br/>2. Select processing options.<br/>3. View results.</p></div></PrivateRoute>} />
+          <Route path="/guide" element={<PrivateRoute><HelpGuide /></PrivateRoute>} />
 
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<PrivateRoute roles={[UserRole.ADMIN]}><AdminDashboard /></PrivateRoute>} />

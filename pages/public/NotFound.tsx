@@ -1,31 +1,18 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
-import { Home, Mail, Sun, Moon, ArrowRight } from 'lucide-react';
+import { PublicHeader } from '../../components/PublicHeader';
+import { Home, Mail, ArrowRight } from 'lucide-react';
 
 export const NotFound: React.FC = () => {
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = useState(false);
-
-  const toggleTheme = () => {
-    if (document.documentElement.classList.contains('dark')) {
-      document.documentElement.classList.remove('dark');
-      setDarkMode(false);
-    } else {
-      document.documentElement.classList.add('dark');
-      setDarkMode(true);
-    }
-  };
 
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center bg-slate-50 dark:bg-black transition-colors duration-300 overflow-hidden font-sans">
       
-      {/* Theme Toggle */}
-      <div className="absolute top-6 right-6 z-20">
-        <button onClick={toggleTheme} className="p-2 rounded-full bg-white dark:bg-slate-800 shadow-lg text-slate-800 dark:text-yellow-400 transition-transform hover:scale-105">
-            {darkMode || document.documentElement.classList.contains('dark') ? <Moon size={20} /> : <Sun size={20} />}
-        </button>
-      </div>
+      {/* Navigation */}
+      <PublicHeader />
 
       {/* Background Gradients */}
       <div className="absolute inset-0 pointer-events-none">
@@ -34,7 +21,7 @@ export const NotFound: React.FC = () => {
         <div className="absolute top-[40%] right-[40%] w-72 h-72 bg-pink-500/20 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-normal dark:bg-pink-900/20 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 max-w-2xl px-6 text-center">
+      <div className="relative z-10 max-w-2xl px-6 text-center pt-16">
         <h1 className="text-[150px] leading-none font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-400 dark:to-blue-400 select-none">
           404
         </h1>

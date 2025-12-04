@@ -1,6 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { PublicHeader } from '../../components/PublicHeader';
 import { 
   Activity, 
   MessageSquare, 
@@ -13,103 +15,32 @@ import {
   Cpu, 
   Shield, 
   Clock, 
-  CheckCircle2,
   ArrowRight,
-  Menu,
-  X,
   Quote,
   Upload,
-  Search,
-  Globe,
-  Sun,
-  Moon
+  Globe
 } from 'lucide-react';
 
 export const Landing: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const { user } = useAuth();
+  const location = useLocation();
+
+  const dashboardLink = user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard';
 
   useEffect(() => {
-    // Check initial preference
-    if (document.documentElement.classList.contains('dark')) {
-      setDarkMode(true);
+    if (location.hash) {
+      setTimeout(() => {
+        const element = document.getElementById(location.hash.substring(1));
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     }
-  }, []);
-
-  const toggleTheme = () => {
-    if (document.documentElement.classList.contains('dark')) {
-      document.documentElement.classList.remove('dark');
-      setDarkMode(false);
-    } else {
-      document.documentElement.classList.add('dark');
-      setDarkMode(true);
-    }
-  };
+  }, [location]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 font-sans selection:bg-purple-500 selection:text-white">
       
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-2">
-              <div className="bg-purple-600 p-1.5 rounded-lg">
-                <Activity className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">CordForge</span>
-            </div>
-            
-            {/* Desktop Menu */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-sm font-medium text-slate-600 hover:text-purple-600 dark:text-slate-300 dark:hover:text-purple-400 transition-colors">Features</a>
-              <a href="#how-it-works" className="text-sm font-medium text-slate-600 hover:text-purple-600 dark:text-slate-300 dark:hover:text-purple-400 transition-colors">How it Works</a>
-              <a href="#testimonials" className="text-sm font-medium text-slate-600 hover:text-purple-600 dark:text-slate-300 dark:hover:text-purple-400 transition-colors">Testimonials</a>
-              
-              <button 
-                onClick={toggleTheme} 
-                className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
-                aria-label="Toggle Theme"
-              >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
-
-              <div className="flex items-center space-x-4 ml-4">
-                <Link to="/login" className="text-sm font-medium text-slate-900 dark:text-white hover:text-purple-600 transition-colors">Log in</Link>
-                <Link to="/register" className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-100 transition-all transform hover:-translate-y-0.5">
-                  Get Started
-                </Link>
-              </div>
-            </div>
-
-            {/* Mobile Menu Button & Theme Toggle */}
-            <div className="md:hidden flex items-center gap-4">
-              <button 
-                onClick={toggleTheme} 
-                className="p-2 text-slate-600 dark:text-slate-300"
-                aria-label="Toggle Theme"
-              >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 text-slate-600 dark:text-slate-300">
-                {isMenuOpen ? <X /> : <Menu />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 absolute w-full">
-            <div className="px-4 pt-2 pb-6 space-y-2 shadow-lg">
-              <a href="#features" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md">Features</a>
-              <a href="#how-it-works" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md">How it Works</a>
-              <Link to="/login" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md">Log in</Link>
-              <Link to="/register" onClick={() => setIsMenuOpen(false)} className="block w-full text-center mt-4 bg-purple-600 text-white px-5 py-3 rounded-lg font-semibold">Get Started</Link>
-            </div>
-          </div>
-        )}
-      </nav>
+      <PublicHeader />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
@@ -136,10 +67,17 @@ export const Landing: React.FC = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Link to="/register" className="w-full sm:w-auto px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-semibold text-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all transform hover:-translate-y-1">
-              Start Analyzing
-            </Link>
-            <Link to="/login" className="w-full sm:w-auto px-8 py-4 flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 rounded-full font-semibold text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
+            {user ? (
+               <Link to={dashboardLink} className="w-full sm:w-auto px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-semibold text-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all transform hover:-translate-y-1">
+                 Launch Dashboard
+               </Link>
+            ) : (
+               <Link to="/register" className="w-full sm:w-auto px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-semibold text-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all transform hover:-translate-y-1">
+                 Start Analyzing
+               </Link>
+            )}
+            
+            <Link to={user ? "/upload" : "/login"} className="w-full sm:w-auto px-8 py-4 flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 rounded-full font-semibold text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
               <Play size={20} className="fill-current" />
               Try Demo
             </Link>
@@ -334,9 +272,15 @@ export const Landing: React.FC = () => {
         <div className="relative max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold text-white mb-6">Ready to Get Started?</h2>
           <p className="text-xl text-slate-300 mb-10">Join researchers and analysts using our platform for advanced sentiment analysis</p>
-          <Link to="/register" className="inline-block bg-white text-slate-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-slate-100 transition-colors">
-            Start Analyzing Now
-          </Link>
+          {user ? (
+            <Link to={dashboardLink} className="inline-block bg-white text-slate-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-slate-100 transition-colors">
+              Access Dashboard
+            </Link>
+          ) : (
+            <Link to="/register" className="inline-block bg-white text-slate-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-slate-100 transition-colors">
+              Start Analyzing Now
+            </Link>
+          )}
         </div>
       </section>
 
@@ -374,7 +318,7 @@ export const Landing: React.FC = () => {
               <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-400">
                 <li><a href="#" className="hover:text-purple-600">About</a></li>
                 <li><a href="#" className="hover:text-purple-600">Team</a></li>
-                <li><a href="#" className="hover:text-purple-600">Contact</a></li>
+                <li><Link to="/contact" className="hover:text-purple-600">Contact</Link></li>
                 <li><a href="#" className="hover:text-purple-600">Blog</a></li>
               </ul>
             </div>

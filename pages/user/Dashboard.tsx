@@ -1,18 +1,16 @@
-
 import React, { useEffect, useState } from 'react';
 import { api } from '../../services/mockBackend';
 import { AnalysisResult } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { 
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend 
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip
 } from 'recharts';
 import { 
   MessageSquare, 
   TrendingUp, 
   Smile, 
   BarChart2, 
-  Search, 
-  MoreHorizontal 
+  Search
 } from 'lucide-react';
 
 // Custom Colors matching the design
@@ -20,10 +18,6 @@ const COLORS = {
   positive: '#22c55e', // Green
   neutral: '#eab308',  // Yellow
   negative: '#ef4444', // Red
-  sarcasm: '#22d3ee',  // Cyan
-  nonSarcasm: '#a855f7', // Purple
-  humor: '#facc15',    // Yellow
-  nonHumor: '#8b5cf6',   // Violet
 };
 
 export const Dashboard: React.FC = () => {
@@ -74,7 +68,7 @@ export const Dashboard: React.FC = () => {
 
   // --- Components ---
 
-  const StatCard = ({ title, value, label, icon: Icon, iconColor, bgClass }: any) => (
+  const StatCard = ({ title, value, icon: Icon, iconColor, bgClass }: any) => (
     <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-slate-100 dark:border-[#333] shadow-sm flex flex-col justify-between h-40 relative overflow-hidden group hover:border-purple-500/30 transition-all duration-300">
       <div className="flex justify-between items-start mb-4">
         <div className={`p-3 rounded-xl ${bgClass} transition-transform group-hover:scale-110`}>
@@ -88,7 +82,7 @@ export const Dashboard: React.FC = () => {
     </div>
   );
 
-  const ProgressBar = ({ label, value, total, colorClass, bgBarClass }: any) => {
+  const ProgressBar = ({ label, value, total, colorClass }: any) => {
     const percent = total > 0 ? (value / total) * 100 : 0;
     return (
       <div className="mb-6">
@@ -107,8 +101,8 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 font-sans pb-10">
-      {/* Header */}
+    <div className="space-y-8 font-sans">
+      {/* Header Text */}
       <div>
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Dashboard</h1>
         <p className="text-slate-500 dark:text-gray-400">Welcome back! Here's your sentiment analysis overview.</p>
@@ -175,13 +169,8 @@ export const Dashboard: React.FC = () => {
                 />
               </PieChart>
             </ResponsiveContainer>
-            {/* Center Text (Optional visual flair) */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-               {/* Could add total count here if desired */}
-            </div>
           </div>
           
-          {/* Custom Legend */}
           <div className="mt-4 space-y-3">
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
