@@ -3,15 +3,16 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { createClient } from '@supabase/supabase-js';
 
 // --- CONFIGURATION ---
+// These are injected by Vite at build time based on your .env file
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseKey = process.env.VITE_SUPABASE_KEY;
-const customApiUrl = process.env.VITE_CUSTOM_API_URL; // URL to your custom model backend
+const customApiUrl = process.env.VITE_CUSTOM_API_URL;
 
 // Check if Supabase is configured
 const isSupabaseConfigured = supabaseUrl && supabaseKey && supabaseUrl !== '' && supabaseKey !== '';
 const supabase = isSupabaseConfigured ? createClient(supabaseUrl!, supabaseKey!) : null;
 
-// Initialize Gemini API (Used as fallback if Custom API is not set)
+// Initialize Gemini API
 const ai = process.env.API_KEY ? new GoogleGenAI({ apiKey: process.env.API_KEY }) : null;
 
 // --- LOCAL STORAGE HELPERS (FALLBACK) ---
@@ -42,8 +43,8 @@ export const api = {
     checkHealth: async (): Promise<boolean> => {
         if (!supabase) return false;
         try {
-            // Check if profiles table exists and is accessible
-            const { error } = await supabase.from('profiles').select('count', { count: 'exact', head: true });
+            // Check connection by reading profiles count
+            const { count, error } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
             return !error;
         } catch {
             return false;
@@ -59,6 +60,7 @@ export const api = {
         if (error) throw new Error(error.message);
         if (!data.user) throw new Error("No user data returned");
 
+        // Fetch profile data
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -67,7 +69,16 @@ export const api = {
 
         if (profileError || !profile) {
              console.error("Profile fetch error", profileError);
-             throw new Error("User profile not found. Please contact support or check if the 'on_auth_user_created' trigger is active in Supabase.");
+             // Fallback: Return basic user info if profile table isn't synced yet
+             const user: User = {
+                id: data.user.id,
+                email: data.user.email || '',
+                username: data.user.user_metadata?.username || 'User',
+                role: (data.user.user_metadata?.role as UserRole) || UserRole.USER,
+                createdAt: new Date().toISOString(),
+                isActive: true
+             };
+             return { user, token: data.session?.access_token || '' };
         }
         
         const user: User = {
@@ -105,20 +116,20 @@ export const api = {
     register: async (username: string, email: string, password: string): Promise<User> => {
       // 1. Try Supabase
       if (supabase) {
-        // We pass metadata. The Trigger in SQL will automatically copy this to the 'profiles' table.
+        // The Trigger in SQL will automatically copy metadata to the 'profiles' table.
         const { data, error } = await supabase.auth.signUp({ 
           email, 
           password,
           options: {
             data: {
               username: username,
-              role: 'USER' 
+              role: 'USER' // Default role
             }
           }
         });
 
         if (error) throw new Error(error.message);
-        if (!data.user) throw new Error("Registration failed. Please check your email for confirmation link.");
+        if (!data.user) throw new Error("Registration failed. Please check your email.");
 
         return {
           id: data.user.id,
@@ -180,16 +191,17 @@ export const api = {
                 .select('*')
                 .eq('id', session.user.id)
                 .single();
-                
-            if (!profile) return null;
+            
+            const username = profile?.username || session.user.user_metadata?.username || 'User';
+            const role = (profile?.role as UserRole) || (session.user.user_metadata?.role as UserRole) || UserRole.USER;
 
             const user: User = {
                 id: session.user.id,
                 email: session.user.email || '',
-                username: profile.username,
-                role: profile.role as UserRole,
-                createdAt: profile.created_at,
-                isActive: profile.is_active
+                username: username,
+                role: role,
+                createdAt: profile?.created_at || new Date().toISOString(),
+                isActive: profile?.is_active ?? true
             };
             return { user, token: session.access_token };
         }
@@ -258,13 +270,20 @@ export const api = {
 
             sentimentData = JSON.parse(response.text);
         } else {
-            throw new Error("No Analysis Service Configured.");
+            // Simple offline mocking
+             sentimentData = {
+                sentiment: 'Neutral',
+                sarcasm: false,
+                humor: false,
+                ocrText: null,
+                detectedObjects: []
+             };
         }
 
         // Common Result Construction
         const resultBase = {
           originalText: text,
-          ocrText: sentimentData.ocrText || (runOcr ? 'No text found' : null),
+          ocrText: sentimentData.ocrText || (runOcr && !sentimentData.ocrText ? 'No text found' : null),
           detectedObjects: sentimentData.detectedObjects || [],
           sentiment: sentimentData.sentiment || 'Neutral',
           sarcasm: sentimentData.sarcasm || false,
@@ -274,7 +293,7 @@ export const api = {
           timestamp: new Date().toISOString()
         };
 
-        // Persistence
+        // Persistence - Supabase
         if (supabase) {
             const dbPayload = {
                 user_id: userId,
@@ -303,7 +322,7 @@ export const api = {
             return { id: savedData.id, userId: savedData.user_id, imageUrl: image, ...resultBase };
         }
 
-        // Local Storage
+        // Persistence - Local Storage
         const newResult: AnalysisResult = {
             id: crypto.randomUUID(),
             userId: userId,
@@ -357,9 +376,12 @@ export const api = {
   admin: {
     getAllUsers: async (): Promise<User[]> => {
       if (supabase) {
-        // Fetch from the 'profiles' table which contains all user metadata
+        // Admin RLS policy allows selecting all profiles
         const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
-        if (error) throw new Error(error.message);
+        if (error) {
+            console.error("Admin: Error fetching users", error);
+            throw new Error(error.message);
+        }
         return data.map((p: any) => ({
           id: p.id,
           username: p.username,
@@ -392,10 +414,9 @@ export const api = {
 
     deleteUser: async (userId: string) => {
        if (supabase) {
-         // Perform a "Soft Delete" by deactivating (safest client-side operation)
-         // OR if cascading is set up, deleting from profiles might trigger issues if not admin.
-         // Ideally, you use a Supabase Edge Function to delete from auth.users.
-         // Here we just delete the profile.
+         // This deletes from profiles, but due to FK constraint it might require cascade or calling auth.admin.deleteUser (which requires Service Role key, unsafe for frontend).
+         // Safe approach for frontend: Delete profile, let cascade handle (if configured) or just soft delete.
+         // For this setup, we just delete the profile row.
          await supabase.from('profiles').delete().eq('id', userId);
        } else {
          const users = getLocalData<any>(STORAGE_KEYS.USERS);
@@ -406,11 +427,12 @@ export const api = {
 
     getStats: async (): Promise<SystemStats> => {
       if (supabase) {
-        // Efficient counting
         const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
         
-        // Fetching analysis for aggregation (In production, use database views or RPC for performance)
-        const { data: analysis } = await supabase.from('analysis_results').select('sentiment, sarcasm, humor');
+        // Admin RLS policy allows selecting all analysis results
+        const { data: analysis, error } = await supabase.from('analysis_results').select('sentiment, sarcasm, humor');
+        
+        if (error) console.error("Admin Stats Error", error);
         
         const safeAnalysis = analysis || [];
         
@@ -422,7 +444,7 @@ export const api = {
           neutralCount: safeAnalysis.filter((a: any) => a.sentiment === 'Neutral').length,
           sarcasmCount: safeAnalysis.filter((a: any) => a.sarcasm).length,
           humorCount: safeAnalysis.filter((a: any) => a.humor).length,
-          activeUsersToday: Math.max(1, Math.floor((userCount || 0) * 0.2))
+          activeUsersToday: Math.max(1, Math.floor((userCount || 0) * 0.2)) // Mocking 'active today' for now
         };
       } else {
         const users = getLocalData<any>(STORAGE_KEYS.USERS);

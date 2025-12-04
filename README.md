@@ -6,57 +6,59 @@
 
 This is an AI-powered sentiment analysis platform for Sinhala text and images, featuring sarcasm detection, humor detection, OCR, and object recognition.
 
-## 🚀 Quick Start
+## 🚀 Step 1: Database Setup (Supabase)
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-2. **Configure Environment:**
-   Create a `.env` file in the root directory:
-   ```env
-   # 1. Database (REQUIRED for Global Admin Access)
-   # Follow the "Database Setup" section below to get these keys.
-   VITE_SUPABASE_URL=your_supabase_project_url
-   VITE_SUPABASE_KEY=your_supabase_anon_key
-
-   # 2. AI Model (Choose One)
-   # Option A: Google Gemini (Fallback/Demo)
-   API_KEY=your_google_gemini_api_key
-   
-   # Option B: Custom Python Model (Production)
-   VITE_CUSTOM_API_URL=http://localhost:5000/analyze
-   ```
-
-3. **Run the app:**
-   ```bash
-   npm run dev
-   ```
-
-## 🗄️ Database Setup (Centralized User Management)
-
-To allow Admins to manage users from any location, you must set up Supabase:
+To enable the Global Admin Dashboard and data persistence:
 
 1.  **Create Account:** Go to [Supabase.com](https://supabase.com) and create a free project.
 2.  **Run SQL Setup:**
     *   In your Supabase Dashboard, click on **SQL Editor** (icon on the left).
     *   Click **New Query**.
     *   Open the file `supabase_setup.sql` located in this project folder.
-    *   Copy the *entire* content and paste it into the Supabase SQL Editor.
+    *   Copy the **entire content** and paste it into the Supabase SQL Editor.
     *   Click **Run** (bottom right). This creates your tables and user permissions.
 3.  **Get API Keys:**
     *   Go to **Project Settings** (gear icon) -> **API**.
     *   Copy the `Project URL`.
     *   Copy the `anon` / `public` Key.
-    *   Paste these into your `.env` file as `VITE_SUPABASE_URL` and `VITE_SUPABASE_KEY`.
 
-**Note:** Once configured, any user who registers will be visible in the Admin Dashboard, regardless of which browser or device they use.
+## 💻 Step 2: Local Configuration
 
-## 🧠 Custom AI Model Connection
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-If you have your own Python/Flask backend for Sinhala analysis:
+2. **Set Environment Variables:**
+   Create a `.env` file in the root directory:
+   ```env
+   # Database (Paste your Supabase keys here)
+   VITE_SUPABASE_URL=https://your-project-url.supabase.co
+   VITE_SUPABASE_KEY=your-anon-key
 
-1. Ensure your backend accepts `POST` requests at `/analyze`.
-2. Add the URL to `.env` as `VITE_CUSTOM_API_URL`.
-3. The app will automatically switch from Gemini to your Custom Model.
+   # AI Model (Paste your Google Gemini API Key here)
+   API_KEY=your_google_gemini_api_key
+   ```
+
+3. **Run Locally:**
+   ```bash
+   npm run dev
+   ```
+
+## 🌍 Step 3: Deploying to cordforge.free.nf
+
+Since you are using a static hosting provider (like InfinityFree), follow these exact steps to connect your live site to the database:
+
+1.  **Ensure `.env` is correct:** Make sure your `.env` file on your computer has the correct Supabase URL and Key.
+2.  **Build the Project:**
+    Run the build command. This takes your code and your keys and packages them into static files.
+    ```bash
+    npm run build
+    ```
+3.  **Upload:**
+    *   You will see a new folder named `dist` created in your project.
+    *   Open your hosting File Manager (e.g., FileZilla or the InfinityFree online file manager).
+    *   Navigate to `htdocs`.
+    *   **Upload the CONTENTS of the `dist` folder** into `htdocs`. (Do not upload the `dist` folder itself, upload the files inside it: `index.html`, `assets/`, etc.).
+
+Once uploaded, your website `https://cordforge.free.nf/` will be connected to the global database. Any user registering there will appear in your Admin Dashboard.
