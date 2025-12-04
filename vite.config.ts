@@ -8,8 +8,10 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     base: './', // Ensures assets load correctly on shared hosting
     define: {
-      // This maps the VITE_API_KEY or API_KEY from .env to process.env.API_KEY for the code to use
+      // We explicitly define these to ensure they exist in the build, even if empty
       'process.env.API_KEY': JSON.stringify(env.API_KEY || env.VITE_API_KEY),
+      'process.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL || ''),
+      'process.env.VITE_SUPABASE_KEY': JSON.stringify(env.VITE_SUPABASE_KEY || ''),
       'process.env': {}
     }
   };

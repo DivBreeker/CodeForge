@@ -18,12 +18,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const session = api.auth.getSession();
-    if (session) {
-      setUser(session.user);
-      setToken(session.token);
-    }
-    setIsLoading(false);
+    // Supabase auth check is async
+    const initAuth = async () => {
+        try {
+            const session = await api.auth.getSession();
+            if (session) {
+                setUser(session.user);
+                setToken(session.token);
+            }
+        } catch (error) {
+            console.error("Session check failed", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    initAuth();
   }, []);
 
   const login = (token: string, user: User) => {
