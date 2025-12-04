@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -6,6 +7,7 @@ import { Landing } from './pages/public/Landing';
 import { Login } from './pages/public/Login';
 import { Register } from './pages/public/Register';
 import { ResetPassword } from './pages/public/ResetPassword';
+import { TermsAndConditions } from './pages/public/TermsAndConditions';
 import { NotFound } from './pages/public/NotFound';
 import { Dashboard } from './pages/user/Dashboard';
 import { Upload } from './pages/user/Upload';
@@ -96,6 +98,7 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/terms" element={<TermsAndConditions />} />
           <Route path="/about" element={<div className="p-10">About Page Stub</div>} />
 
           {/* User Routes */}

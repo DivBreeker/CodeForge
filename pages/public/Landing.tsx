@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -382,7 +383,7 @@ export const Landing: React.FC = () => {
               <h4 className="font-bold text-slate-900 dark:text-white mb-6">Legal</h4>
               <ul className="space-y-4 text-sm text-slate-600 dark:text-slate-400">
                 <li><a href="#" className="hover:text-purple-600">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-purple-600">Terms of Service</a></li>
+                <li><Link to="/terms" className="hover:text-purple-600">Terms of Service</Link></li>
                 <li><a href="#" className="hover:text-purple-600">Data Consent</a></li>
                 <li><a href="#" className="hover:text-purple-600">Cookie Policy</a></li>
               </ul>
@@ -393,7 +394,7 @@ export const Landing: React.FC = () => {
             <p>© 2024 CordForge. Academic Research Project. All rights reserved.</p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="hover:text-slate-900 dark:hover:text-white">Privacy</a>
-              <a href="#" className="hover:text-slate-900 dark:hover:text-white">Terms</a>
+              <Link to="/terms" className="hover:text-slate-900 dark:hover:text-white">Terms</Link>
               <a href="#" className="hover:text-slate-900 dark:hover:text-white">Cookies</a>
             </div>
           </div>

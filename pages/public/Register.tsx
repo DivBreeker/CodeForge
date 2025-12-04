@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../services/mockBackend';
@@ -152,7 +153,7 @@ export const Register: React.FC = () => {
                     className="mt-1 h-4 w-4 text-slate-900 dark:text-white focus:ring-slate-900 dark:focus:ring-white border-gray-300 rounded cursor-pointer"
                 />
                 <label htmlFor="consent" className="ml-2 block text-sm text-slate-600 dark:text-slate-400">
-                    I agree to the <a href="#" className="text-purple-600 dark:text-purple-400 hover:underline">Terms & Conditions</a> and provide <a href="#" className="text-purple-600 dark:text-purple-400 hover:underline">consent</a> for data processing.
+                    I agree to the <Link to="/terms" className="text-purple-600 dark:text-purple-400 hover:underline">Terms & Conditions</Link> and provide <Link to="/terms" className="text-purple-600 dark:text-purple-400 hover:underline">consent</Link> for data processing.
                 </label>
             </div>
 
