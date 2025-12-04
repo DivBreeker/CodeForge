@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { PublicHeader } from '../../components/PublicHeader';
+import { PublicFooter } from '../../components/PublicFooter';
 import { 
   Mail, 
   MapPin, 
@@ -40,13 +41,13 @@ export const Contact: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-black transition-colors duration-300 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-black transition-colors duration-300 font-sans flex flex-col">
       
       {/* Navigation */}
       <PublicHeader />
 
       {/* Main Content */}
-      <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <main className="flex-grow pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         
         <div className="text-center mb-16">
             <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">Get in Touch</h1>
@@ -191,18 +192,9 @@ export const Contact: React.FC = () => {
                 </div>
             </div>
         </div>
-      </div>
+      </main>
 
-      {/* Simple Footer */}
-      <footer className="border-t border-slate-200 dark:border-slate-800 py-8 bg-white dark:bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
-            <p>© 2024 CordForge. Academic Research Project. All rights reserved.</p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link to="/terms" className="hover:text-slate-900 dark:hover:text-white">Privacy Policy</Link>
-              <Link to="/terms" className="hover:text-slate-900 dark:hover:text-white">Terms of Service</Link>
-            </div>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 };

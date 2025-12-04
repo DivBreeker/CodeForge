@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { PublicHeader } from '../../components/PublicHeader';
+import { PublicFooter } from '../../components/PublicFooter';
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -113,12 +114,12 @@ export const TermsAndConditions: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-black transition-colors duration-300 font-sans pb-20">
+    <div className="min-h-screen bg-slate-100 dark:bg-black transition-colors duration-300 font-sans flex flex-col">
       
       {/* Top Bar */}
       <PublicHeader />
 
-      <div className="pt-24 max-w-4xl mx-auto px-6">
+      <main className="flex-grow pt-24 pb-20 max-w-4xl mx-auto px-6 w-full">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">Terms & Conditions</h1>
         
         {/* Accordion Sections */}
@@ -202,11 +203,9 @@ export const TermsAndConditions: React.FC = () => {
                 Please read all sections above before accepting
             </p>
         </div>
-        
-        <div className="mt-12 text-center text-xs text-slate-400 dark:text-slate-600">
-            © 2024 Sarcasm & Humor-Aware Sentiment Analyzer. All rights reserved.
-        </div>
-      </div>
+      </main>
+
+      <PublicFooter />
     </div>
   );
 };
