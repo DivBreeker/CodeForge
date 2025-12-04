@@ -2,14 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../services/mockBackend';
 import { SystemStats } from '../../types';
-import { Users, FileText, CheckCircle, AlertTriangle, Smile, Activity, Settings, Database, ArrowRight } from 'lucide-react';
+import { Users, FileText, CheckCircle, AlertTriangle, Smile, Activity, Settings, Database, ArrowRight, Cloud, HardDrive, Wifi } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<SystemStats | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isCustomModel, setIsCustomModel] = useState(false);
   
   useEffect(() => {
     api.admin.getStats().then(setStats);
+    
+    // Check actual database health
+    api.status.checkHealth().then(status => setIsConnected(status));
+    
+    setIsCustomModel(api.status.isCustomModelConnected());
   }, []);
 
   if (!stats) return (
@@ -50,12 +57,36 @@ export const AdminDashboard: React.FC = () => {
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Admin Dashboard</h1>
             <p className="text-slate-500 dark:text-slate-400">System overview and platform controls.</p>
         </div>
-        <div className="flex gap-3">
-            <button className="px-4 py-2 bg-slate-100 dark:bg-[#1F1F1F] text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-200 dark:hover:bg-[#2A2A2A] transition-colors">
-                Export Report
-            </button>
+        
+        {/* Connection Status Badges */}
+        <div className="flex flex-col sm:flex-row gap-3">
+             <div className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 border ${isConnected ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300' : 'bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-300'}`}>
+                {isConnected ? <Cloud size={16} /> : <HardDrive size={16} />}
+                {isConnected ? 'DB: Centralized (Supabase)' : 'DB: Local Browser Storage'}
+            </div>
+
+             <div className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 border ${isCustomModel ? 'bg-purple-50 border-purple-200 text-purple-700 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-300' : 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300'}`}>
+                <Wifi size={16} />
+                {isCustomModel ? 'AI: Custom Python Model' : 'AI: Google Gemini Fallback'}
+            </div>
         </div>
        </div>
+
+       {!isConnected && (
+         <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4 rounded-r-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <AlertTriangle className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-yellow-700 dark:text-yellow-200">
+                  You are currently in <strong>Local Mode</strong>. Users from other browsers will not appear here. 
+                  To fix this, create a project at <a href="https://supabase.com" target="_blank" className="underline font-bold">Supabase.com</a>, run the setup SQL, and add your API keys to the configuration.
+                </p>
+              </div>
+            </div>
+          </div>
+       )}
 
        {/* Top Stats */}
        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
