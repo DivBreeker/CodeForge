@@ -1,0 +1,5 @@
+{
+  "name": "CordForge Sentiment Analyzer",
+  "description": "A sarcasm and humor-aware sentiment analysis platform for Sinhala social media comments, featuring OCR, object detection, and comprehensive analytics.",
+  "requestFramePermissions": []
+}
